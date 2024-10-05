@@ -1,6 +1,7 @@
 package library
 
 import (
+	"database/sql"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"io/fs"
@@ -36,4 +37,16 @@ type ServiceInitializationInformation struct {
 	Router        *chi.Mux                   `validate:"required"`
 	Configuration map[string]interface{}
 	ResourceDir   fs.FS
+}
+
+type DBType int
+
+const (
+	Sqlite   DBType = 0
+	Postgres DBType = 1
+)
+
+type Database struct {
+	DB     *sql.DB
+	DBType DBType
 }
