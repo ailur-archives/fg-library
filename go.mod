@@ -1,4 +1,4 @@
-module git.ailur.dev/ailur/fg-library
+module git.ailur.dev/ailur/fg-library/v2
 
 go 1.23.1
 
