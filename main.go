@@ -34,7 +34,6 @@ type ServiceInitializationInformation struct {
 	Domain        string                     `validate:"required"`
 	Outbox        chan<- InterServiceMessage `validate:"required"`
 	Inbox         <-chan InterServiceMessage `validate:"required"`
-	Router        *chi.Mux                   `validate:"required"`
 	Configuration map[string]interface{}
 	ResourceDir   fs.FS
 }
