@@ -2,6 +2,7 @@ package library
 
 import (
 	"database/sql"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"io/fs"
 	"time"
@@ -33,6 +34,7 @@ type ServiceInitializationInformation struct {
 	Domain        string                     `validate:"required"`
 	Outbox        chan<- InterServiceMessage `validate:"required"`
 	Inbox         <-chan InterServiceMessage `validate:"required"`
+	Router        *chi.Mux                   `validate:"required"`
 	Configuration map[string]interface{}
 	ResourceDir   fs.FS
 }
