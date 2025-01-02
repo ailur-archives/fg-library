@@ -117,7 +117,7 @@ type Database interface {
 	DeleteTable(name string) error
 	InsertRow(name string, row Row) error
 	Delete(name string, params QueryParameters) error
-	Select(name string, params QueryParameters) (Rows, error)
+	Select(name string, params QueryParameters, schema TableSchema) (Rows, error)
 	Update(name string, params QueryParameters, update UpdateParameters) error
 }
 
