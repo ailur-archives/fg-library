@@ -1,11 +1,11 @@
 package library
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"io/fs"
-	"math/big"
 	"sync"
 	"time"
 )
@@ -72,55 +72,17 @@ func (s *ServiceInitializationInformation) YesIAbsolutelyKnowWhatIAmDoingAndIWan
 	return s.inbox
 }
 
-type ColumnType interface{}
+type DBType int
 
-type (
-	// String represents arbitrary sized text
-	String string
-	// Int32 represents a 32-bit signed integer
-	Int32 int32
-	// Int64 represents a 64-bit signed integer
-	Int64 int64
-	// IntInf represents an arbitrary sized signed integer
-	IntInf big.Int
-	// Float32 represents a 32-bit floating point number
-	Float32 float32
-	// Float64 represents a 64-bit floating point number
-	Float64 float64
-	// Boolean represents a boolean value
-	Boolean bool
-	// Blob represents an arbitrary sized binary object
-	Blob []byte
-	// UUID represents a UUID value
-	UUID uuid.UUID
-	// Time represents a time value
-	Time time.Time
+const (
+	Sqlite DBType = iota
+	Postgres
 )
 
-type TableSchema map[string]ColumnType
-type Row map[string]any
-type Rows []Row
-
-type QueryParameters struct {
-	Equal              map[string]any
-	NotEqual           map[string]any
-	GreaterThan        map[string]any
-	LessThan           map[string]any
-	GreaterThanOrEqual map[string]any
-	LessThanOrEqual    map[string]any
+type Database struct {
+	DB     *sql.DB
+	DBType DBType
 }
-
-type UpdateParameters map[string]any
-
-type Database interface {
-	CreateTable(name string, schema TableSchema) error
-	DeleteTable(name string) error
-	InsertRow(name string, row Row) error
-	Delete(name string, params QueryParameters) error
-	Select(name string, params QueryParameters, schema TableSchema) (Rows, error)
-	Update(name string, params QueryParameters, update UpdateParameters) error
-}
-
 type MessageCode int
 
 const (
@@ -215,7 +177,7 @@ func (s *ServiceInitializationInformation) GetDatabase() (Database, error) {
 
 	response, err := s.SendAndAwaitISMessage(uuid.Nil, 0, nil, 5*time.Second)
 	if err != nil {
-		return nil, err
+		return Database{}, err
 	}
 
 	return response.Message.(Database), nil
