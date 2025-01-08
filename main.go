@@ -170,10 +170,12 @@ func (s *ServiceInitializationInformation) SendISMessage(forService uuid.UUID, m
 	return id
 }
 
-func (s *InterServiceMessage) Respond(messageType MessageCode, message any) {
+func (s *InterServiceMessage) Respond(messageType MessageCode, message any, information ServiceInitializationInformation) {
 	s.ServiceID, s.ForServiceID = s.ForServiceID, s.ServiceID
 	s.MessageType = messageType
 	s.Message = message
+	s.SentAt = time.Now()
+	information.Outbox <- *s
 }
 
 func (s *ServiceInitializationInformation) SendAndAwaitISMessage(forService uuid.UUID, messageType MessageCode, message any, timeout time.Duration) (InterServiceMessage, error) {
