@@ -171,11 +171,12 @@ func (s *ServiceInitializationInformation) SendISMessage(forService uuid.UUID, m
 }
 
 func (s *InterServiceMessage) Respond(messageType MessageCode, message any, information ServiceInitializationInformation) {
-	s.ServiceID, s.ForServiceID = s.ForServiceID, s.ServiceID
-	s.MessageType = messageType
-	s.Message = message
-	s.SentAt = time.Now()
-	information.Outbox <- *s
+	n := *s
+	n.ServiceID, n.ForServiceID = n.ForServiceID, n.ServiceID
+	n.MessageType = messageType
+	n.Message = message
+	n.SentAt = time.Now()
+	information.Outbox <- n
 }
 
 func (s *ServiceInitializationInformation) SendAndAwaitISMessage(forService uuid.UUID, messageType MessageCode, message any, timeout time.Duration) (InterServiceMessage, error) {
@@ -183,12 +184,14 @@ func (s *ServiceInitializationInformation) SendAndAwaitISMessage(forService uuid
 	return AwaitISMessage(id, timeout)
 }
 
+var databaseService = uuid.MustParse("00000000-0000-0000-0000-000000000001")
+
 func (s *ServiceInitializationInformation) GetDatabase() (Database, error) {
 	if !ispStarted {
 		go s.StartISProcessor()
 	}
 
-	response, err := s.SendAndAwaitISMessage(uuid.Nil, 0, nil, 5*time.Second)
+	response, err := s.SendAndAwaitISMessage(databaseService, 0, nil, 5*time.Second)
 	if err != nil {
 		return Database{}, err
 	}
