@@ -42,8 +42,8 @@ type InterServiceMessage struct {
 
 // NewServiceInitializationInformation creates a new ServiceInitializationInformation and is only ever meant to be called
 // by fulgens or a compliant implementation of fulgens.
-func NewServiceInitializationInformation(domain *string, outbox chan<- InterServiceMessage, inbox <-chan InterServiceMessage, router *chi.Mux, configuration map[string]interface{}, resourceDir fs.FS) ServiceInitializationInformation {
-	return ServiceInitializationInformation{
+func NewServiceInitializationInformation(domain *string, outbox chan<- InterServiceMessage, inbox <-chan InterServiceMessage, router *chi.Mux, configuration map[string]interface{}, resourceDir fs.FS) *ServiceInitializationInformation {
+	return &ServiceInitializationInformation{
 		Domain:        domain,
 		Outbox:        outbox,
 		inbox:         inbox,
