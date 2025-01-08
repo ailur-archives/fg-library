@@ -93,6 +93,7 @@ const (
 )
 
 var buffer = make(map[uuid.UUID]InterServiceMessage)
+var waitingList = make(map[uuid.UUID]struct{})
 var mutex = sync.Mutex{}
 var arrived = make(chan uuid.UUID)
 var ispStarted = false
@@ -127,6 +128,7 @@ func AwaitISMessage(id uuid.UUID, timeout time.Duration) (InterServiceMessage, e
 				mutex.Lock()
 				msg := buffer[id]
 				delete(buffer, id)
+				delete(waitingList, id)
 				mutex.Unlock()
 				if msg.MessageType != Success {
 					return msg, msg.Message.(error)
@@ -161,6 +163,9 @@ func (s *ServiceInitializationInformation) SendISMessage(forService uuid.UUID, m
 		SentAt:       time.Now(),
 		Message:      message,
 	}
+	mutex.Lock()
+	waitingList[id] = struct{}{}
+	mutex.Unlock()
 	s.Outbox <- msg
 	return id
 }
@@ -181,4 +186,20 @@ func (s *ServiceInitializationInformation) GetDatabase() (Database, error) {
 	}
 
 	return response.Message.(Database), nil
+}
+
+func (s *ServiceInitializationInformation) AcceptMessage() InterServiceMessage {
+	for {
+		<-arrived
+		mutex.Lock()
+		for id, msg := range buffer {
+			_, ok := waitingList[id]
+			if !ok {
+				delete(buffer, id)
+				mutex.Unlock()
+				return msg
+			}
+		}
+		mutex.Unlock()
+	}
 }
