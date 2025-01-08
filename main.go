@@ -108,7 +108,6 @@ const (
 
 func (s *ServiceInitializationInformation) StartISProcessor() {
 	if s.internal.ispStarted {
-		println("IS Processor already started")
 		return
 	} else {
 		s.internal.ispStarted = true
@@ -116,7 +115,6 @@ func (s *ServiceInitializationInformation) StartISProcessor() {
 	listener := NewListener(s.inbox)
 	for {
 		msg := listener.AcceptMessage()
-		println("Received message on ID: " + msg.ForServiceID.String() + "for id: " + msg.MessageID.String())
 		s.internal.mutex.Lock()
 		s.internal.buffer[msg.MessageID] = msg
 		s.internal.mutex.Unlock()
@@ -160,9 +158,7 @@ func NewListener(c <-chan InterServiceMessage) Listener {
 }
 
 func (l DefaultListener) AcceptMessage() InterServiceMessage {
-	println("Listener has pointer address: ", l)
 	msg := <-l
-	println("Received message on ID: " + msg.ForServiceID.String())
 	return msg
 }
 
@@ -183,13 +179,12 @@ func (s *ServiceInitializationInformation) SendISMessage(forService uuid.UUID, m
 	return id
 }
 
-func (s *InterServiceMessage) Respond(messageType MessageCode, message any, information ServiceInitializationInformation) {
+func (s *InterServiceMessage) Respond(messageType MessageCode, message any, information *ServiceInitializationInformation) {
 	n := *s
 	n.ServiceID, n.ForServiceID = n.ForServiceID, n.ServiceID
 	n.MessageType = messageType
 	n.Message = message
 	n.SentAt = time.Now()
-	println(information.Outbox)
 	information.Outbox <- n
 }
 
