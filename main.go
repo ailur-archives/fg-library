@@ -194,6 +194,7 @@ func (s *ServiceInitializationInformation) AcceptMessage() InterServiceMessage {
 		mutex.Lock()
 		for id, msg := range buffer {
 			_, ok := waitingList[id]
+
 			if !ok {
 				delete(buffer, id)
 				mutex.Unlock()
